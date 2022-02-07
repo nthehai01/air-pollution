@@ -204,6 +204,7 @@ downloadedFile &lt;- &quot;./specdata.zip&quot;</code></pre>
 <p>Write a function named ‘pollutantmean’ that calculates the mean of a pollutant (sulfate or nitrate) across a specified list of monitors. The function ‘pollutantmean’ takes three arguments: ‘directory’, ‘pollutant’, and ‘id’. Given a vector monitor ID numbers, ‘pollutantmean’ reads that monitors’ particulate matter data from the directory specified in the ‘directory’ argument and returns the mean of the pollutant across all of the monitors, ignoring any missing values coded as NA.</p>
 <div id="function-summary" class="section level4">
 <h4>Function summary</h4>
+<p><code>pollutantmean(directory, pollutant, id = 1:332)</code></p>
 <p><em>Input:</em></p>
 <ul>
 <li><code>directory</code> is a character vector of length 1 indicating the location of the CSV files</li>
@@ -218,21 +219,64 @@ downloadedFile &lt;- &quot;./specdata.zip&quot;</code></pre>
 <ul>
 <li><em>Util functions</em></li>
 </ul>
-<p><code>construct.path()</code>: construct the full path from the main directory to a specific given csv file based on the id of the file. Example: if the <code>directory</code> and <code>id</code> arguments are <code>data</code> and <code>10</code>, respectively, the result is <code>data/010.csv</code>.</p>
-<pre class="r"><code>construct.path &lt;- function(directory, id) {
+<p><code>construct.path(id, directory)</code>: construct the full path from the main directory to a specific given csv file based on the id of the file. Example: if the <code>directory</code> and <code>id</code> arguments are <code>data</code> and <code>10</code>, respectively, the result is <code>data/010.csv</code>.</p>
+<pre class="r"><code>construct.path &lt;- function(id, directory) {
     return(paste(directory, 
                  &quot;/&quot;, 
                  formatC(id, width = 3, flag = &quot;0&quot;), 
                  &quot;.csv&quot;, 
                  sep = &quot;&quot;))     
 }</code></pre>
-<p><code>construct.path()</code>: construct the full path from the main directory to a specific given csv file based on the id of the file. Example: if the <code>directory</code> and <code>id</code> arguments are <code>data</code> and <code>10</code>, respectively, the result is <code>data/010.csv</code>.</p>
+<p><code>read.monitor(path)</code>: read the data from a particular monitor stored in a file.</p>
+<pre class="r"><code>read.monitor &lt;- function(id, directory) {
+    path &lt;- construct.path(id, directory)
+    return(read.csv(path))
+}</code></pre>
+<p><code>read.monitors(id, directory)</code>: read the data from all the monitors and concatenate them</p>
+<pre class="r"><code>library(plyr)
+read.monitors &lt;- function(id, directory) {
+    ## read all the data frames
+    dfs &lt;- lapply(id, read.monitor, directory)  
+    
+    ## merge data frames
+    return(ldply(dfs, rbind))
+}</code></pre>
 <ul>
 <li><em>Main function</em></li>
 </ul>
 <pre class="r"><code>pollutantmean &lt;- function(directory, pollutant, id = 1:332) {
-    
+    df &lt;- read.monitors(id, directory)  ## load data frames
+    return(mean(df[, pollutant], na.rm = TRUE))
 }</code></pre>
+<ul>
+<li><em>Some illustrations</em></li>
+</ul>
+<pre class="r"><code>pollutantmean(&quot;specdata&quot;, &quot;sulfate&quot;, 1:10)</code></pre>
+<pre><code>## [1] 4.064128</code></pre>
+<pre class="r"><code>pollutantmean(&quot;specdata&quot;, &quot;nitrate&quot;, 70:72)</code></pre>
+<pre><code>## [1] 1.706047</code></pre>
+<pre class="r"><code>pollutantmean(&quot;specdata&quot;, &quot;nitrate&quot;, 23)</code></pre>
+<pre><code>## [1] 1.280833</code></pre>
+</div>
+</div>
+<div id="part-2" class="section level2">
+<h2>Part 2</h2>
+<p>Write a function that reads a directory full of files and reports the number of completely observed cases in each data file. The function should return a data frame where the first column is the name of the file and the second column is the number of complete cases.</p>
+<div id="function-summary-1" class="section level4">
+<h4>Function summary</h4>
+<p><code>complete(directory, pollutant, id = 1:332)</code></p>
+<p><em>Input</em></p>
+<ul>
+<li><code>directory</code> is a character vector of length 1 indicating the location of the CSV files</li>
+<li><code>id</code> is an integer vector indicating the monitor ID numbers to be used</li>
+</ul>
+<p><em>Output</em></p>
+<p>Return a data frame of the form:</p>
+<pre class="r"><code>##    id      nobs
+##    1       117
+##    2       1041
+##    ...</code></pre>
+<p>where <code>id</code> if the monitor ID number and <code>nobs</code> is the number of complete cases.</p>
 </div>
 </div>
 
