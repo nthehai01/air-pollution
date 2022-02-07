@@ -232,20 +232,17 @@ downloadedFile &lt;- &quot;./specdata.zip&quot;</code></pre>
     path &lt;- construct.path(id, directory)
     return(read.csv(path))
 }</code></pre>
-<p><code>read.monitors(id, directory)</code>: read the data from all the monitors and concatenate them</p>
-<pre class="r"><code>library(plyr)
-read.monitors &lt;- function(id, directory) {
-    ## read all the data frames
-    dfs &lt;- lapply(id, read.monitor, directory)  
-    
-    ## merge data frames
-    return(ldply(dfs, rbind))
-}</code></pre>
 <ul>
 <li><em>Main function</em></li>
 </ul>
-<pre class="r"><code>pollutantmean &lt;- function(directory, pollutant, id = 1:332) {
-    df &lt;- read.monitors(id, directory)  ## load data frames
+<pre class="r"><code>library(plyr)
+pollutantmean &lt;- function(directory, pollutant, id = 1:332) {
+    ## read all the data frames
+    dfs &lt;- lapply(id, read.monitor, directory)  
+    
+    ## concatenate data frames in dfs
+    df &lt;- ldply(dfs, rbind)
+    
     return(mean(df[, pollutant], na.rm = TRUE))
 }</code></pre>
 <ul>
@@ -277,6 +274,48 @@ read.monitors &lt;- function(id, directory) {
 ##    2       1041
 ##    ...</code></pre>
 <p>where <code>id</code> if the monitor ID number and <code>nobs</code> is the number of complete cases.</p>
+</div>
+<div id="function-definition" class="section level4">
+<h4>Function definition</h4>
+<pre class="r"><code>complete &lt;- function(directory, id = 1:332) {
+    ## read all the data frames
+    dfs &lt;- lapply(id, read.monitor, directory)  
+    
+    ## check whether an observation in dfs is complete
+    cpte.cases.rough &lt;- lapply(dfs, complete.cases)
+    ## sum of completely observed cases
+    cpte.cases.rough &lt;- sapply(cpte.cases.rough, sum)
+    
+    ## return the result as a proper data frame
+    return(data.frame(
+        id = id,
+        nobs = cpte.cases.rough
+    ))
+}</code></pre>
+<ul>
+<li><em>Some illutrations</em></li>
+</ul>
+<pre class="r"><code>complete(&quot;specdata&quot;, 1)</code></pre>
+<pre><code>##   id nobs
+## 1  1  117</code></pre>
+<pre class="r"><code>complete(&quot;specdata&quot;, c(2, 4, 8, 10, 12))</code></pre>
+<pre><code>##   id nobs
+## 1  2 1041
+## 2  4  474
+## 3  8  192
+## 4 10  148
+## 5 12   96</code></pre>
+<pre class="r"><code>complete(&quot;specdata&quot;, 30:25)</code></pre>
+<pre><code>##   id nobs
+## 1 30  932
+## 2 29  711
+## 3 28  475
+## 4 27  338
+## 5 26  586
+## 6 25  463</code></pre>
+<pre class="r"><code>complete(&quot;specdata&quot;, 3)</code></pre>
+<pre><code>##   id nobs
+## 1  3  243</code></pre>
 </div>
 </div>
 

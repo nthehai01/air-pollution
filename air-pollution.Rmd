@@ -85,22 +85,16 @@ read.monitor <- function(id, directory) {
 }
 ```
 
-```read.monitors(id, directory)```: read the data from all the monitors and concatenate them
+- *Main function*
 ```{r}
 library(plyr)
-read.monitors <- function(id, directory) {
+pollutantmean <- function(directory, pollutant, id = 1:332) {
     ## read all the data frames
     dfs <- lapply(id, read.monitor, directory)  
     
-    ## merge data frames
-    return(ldply(dfs, rbind))
-}
-```
-
-- *Main function*
-```{r}
-pollutantmean <- function(directory, pollutant, id = 1:332) {
-    df <- read.monitors(id, directory)  ## load data frames
+    ## concatenate data frames in dfs
+    df <- ldply(dfs, rbind)
+    
     return(mean(df[, pollutant], na.rm = TRUE))
 }
 ```
@@ -143,4 +137,42 @@ Return a data frame of the form:
 ```
 
 where ```id``` if the monitor ID number and ```nobs``` is the number of complete cases.
+
+#### Function definition
+
+```{r}
+complete <- function(directory, id = 1:332) {
+    ## read all the data frames
+    dfs <- lapply(id, read.monitor, directory)  
+    
+    ## check whether an observation in dfs is complete
+    cpte.cases.rough <- lapply(dfs, complete.cases)
+    ## sum of completely observed cases
+    cpte.cases.rough <- sapply(cpte.cases.rough, sum)
+    
+    ## return the result as a proper data frame
+    return(data.frame(
+        id = id,
+        nobs = cpte.cases.rough
+    ))
+}
+```
+
+- *Some illutrations*
+
+```{r}
+complete("specdata", 1)
+```
+
+```{r}
+complete("specdata", c(2, 4, 8, 10, 12))
+```
+
+```{r}
+complete("specdata", 30:25)
+```
+
+```{r}
+complete("specdata", 3)
+```
 
