@@ -176,3 +176,85 @@ complete("specdata", 30:25)
 complete("specdata", 3)
 ```
 
+
+## Part 3
+
+Write a function that takes a directory of data files and a threshold for complete cases and calculates the correlation between sulfate and nitrate for monitor locations where the number of completely observed cases (on all variables) is greater than the threshold. The function should return a vector of correlations for the monitors that meet the threshold requirement. If no monitors meet the threshold requirement, then the function should return a numeric vector of length 0.
+
+#### Function summary
+
+```corr(directory, threshold = 0)```
+
+*Input*
+
+* ```directory``` is a character vector of length 1 indicating the location of the CSV files
+* ```threshold``` is a numeric vector of length 1 indicating the number of completely observed observation (on all variables) required to compute the correlation between nitrate and sulfate; the default is 0
+
+*Output*
+
+Return a numeric vector of correlations
+
+#### Function definitions
+
+- *Util function*
+
+```get.cor(df)```: get the correlation between ```sulfate``` and ```nitrate``` in ```df```.
+```{r}
+get.cor <- function(df) cor(df$sulfate, df$nitrate, use = "complete.obs")
+```
+
+- *Main function*
+
+```{r}
+corr <- function(directory, threshold = 0) {
+    ## find the number of completely observed cases on each monitor
+    cpte.cases <- complete(directory)
+    
+    ## filter the monitors that meet the threshold
+    proper.cases <- cpte.cases[cpte.cases$nobs > threshold, ]
+    proper.cases
+    ## read data of the monitors that meets the threshold
+    dfs <- lapply(proper.cases$id, read.monitor, directory)  
+    
+    return(sapply(dfs, get.cor))
+}
+```
+
+- *Some illustration*
+
+```{r}
+cr <- corr("specdata", 150)
+head(cr)
+```
+
+```{r}
+summary(cr)
+```
+
+```{r}
+cr <- corr("specdata", 400)
+head(cr)
+```
+
+```{r}
+summary(cr)
+```
+
+```{r}
+cr <- corr("specdata", 5000)
+summary(cr)
+```
+
+```{r}
+length(cr)
+```
+
+```{r}
+cr <- corr("specdata")
+summary(cr)
+```
+
+```{r}
+length(cr)
+```
+

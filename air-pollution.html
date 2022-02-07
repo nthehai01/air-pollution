@@ -318,6 +318,71 @@ pollutantmean &lt;- function(directory, pollutant, id = 1:332) {
 ## 1  3  243</code></pre>
 </div>
 </div>
+<div id="part-3" class="section level2">
+<h2>Part 3</h2>
+<p>Write a function that takes a directory of data files and a threshold for complete cases and calculates the correlation between sulfate and nitrate for monitor locations where the number of completely observed cases (on all variables) is greater than the threshold. The function should return a vector of correlations for the monitors that meet the threshold requirement. If no monitors meet the threshold requirement, then the function should return a numeric vector of length 0.</p>
+<div id="function-summary-2" class="section level4">
+<h4>Function summary</h4>
+<p><code>corr(directory, threshold = 0)</code></p>
+<p><em>Input</em></p>
+<ul>
+<li><code>directory</code> is a character vector of length 1 indicating the location of the CSV files</li>
+<li><code>threshold</code> is a numeric vector of length 1 indicating the number of completely observed observation (on all variables) required to compute the correlation between nitrate and sulfate; the default is 0</li>
+</ul>
+<p><em>Output</em></p>
+<p>Return a numeric vector of correlations</p>
+</div>
+<div id="function-definitions-1" class="section level4">
+<h4>Function definitions</h4>
+<ul>
+<li><em>Util function</em></li>
+</ul>
+<p><code>get.cor(df)</code>: get the correlation between <code>sulfate</code> and <code>nitrate</code> in <code>df</code>.</p>
+<pre class="r"><code>get.cor &lt;- function(df) cor(df$sulfate, df$nitrate, use = &quot;complete.obs&quot;)</code></pre>
+<ul>
+<li><em>Main function</em></li>
+</ul>
+<pre class="r"><code>corr &lt;- function(directory, threshold = 0) {
+    ## find the number of completely observed cases on each monitor
+    cpte.cases &lt;- complete(directory)
+    
+    ## filter the monitors that meet the threshold
+    proper.cases &lt;- cpte.cases[cpte.cases$nobs &gt; threshold, ]
+    proper.cases
+    ## read data of the monitors that meets the threshold
+    dfs &lt;- lapply(proper.cases$id, read.monitor, directory)  
+    
+    return(sapply(dfs, get.cor))
+}</code></pre>
+<ul>
+<li><em>Some illustration</em></li>
+</ul>
+<pre class="r"><code>cr &lt;- corr(&quot;specdata&quot;, 150)
+head(cr)</code></pre>
+<pre><code>## [1] -0.01895754 -0.14051254 -0.04389737 -0.06815956 -0.12350667 -0.07588814</code></pre>
+<pre class="r"><code>summary(cr)</code></pre>
+<pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## -0.21057 -0.04999  0.09463  0.12525  0.26844  0.76313</code></pre>
+<pre class="r"><code>cr &lt;- corr(&quot;specdata&quot;, 400)
+head(cr)</code></pre>
+<pre><code>## [1] -0.01895754 -0.04389737 -0.06815956 -0.07588814  0.76312884 -0.15782860</code></pre>
+<pre class="r"><code>summary(cr)</code></pre>
+<pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## -0.17623 -0.03109  0.10021  0.13969  0.26849  0.76313</code></pre>
+<pre class="r"><code>cr &lt;- corr(&quot;specdata&quot;, 5000)
+summary(cr)</code></pre>
+<pre><code>## Length  Class   Mode 
+##      0   list   list</code></pre>
+<pre class="r"><code>length(cr)</code></pre>
+<pre><code>## [1] 0</code></pre>
+<pre class="r"><code>cr &lt;- corr(&quot;specdata&quot;)
+summary(cr)</code></pre>
+<pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## -1.00000 -0.05282  0.10718  0.13684  0.27831  1.00000</code></pre>
+<pre class="r"><code>length(cr)</code></pre>
+<pre><code>## [1] 323</code></pre>
+</div>
+</div>
 
 
 
