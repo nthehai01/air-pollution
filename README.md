@@ -16,4 +16,4 @@ This project is falling into 3 parts:
 
 > *Part 3*: Calculating the correlation between sulfate and nitrate for monitor locations where the number of completely observed cases (on all variables) is greater than a given *threshold*.
 
-Concretely, check the HTML version of the code notebook [here](./air-pollution.html) for more information.
+Concretely, check the published version of the code notebook [here](https://rpubs.com/nthehai01/air-pollution) for more information.
