@@ -212,7 +212,7 @@ corr <- function(directory, threshold = 0) {
     
     ## filter the monitors that meet the threshold
     proper.cases <- cpte.cases[cpte.cases$nobs > threshold, ]
-    proper.cases
+    
     ## read data of the monitors that meets the threshold
     dfs <- lapply(proper.cases$id, read.monitor, directory)  
     
@@ -220,7 +220,7 @@ corr <- function(directory, threshold = 0) {
 }
 ```
 
-- *Some illustration*
+- *Some illustrations*
 
 ```{r}
 cr <- corr("specdata", 150)
